@@ -40,22 +40,41 @@ class Farm
 
   def status
     @all_fields.each do |field|
+      if field.class != Pasture
+      if field.area != 0
     puts "#{field.type} field is #{field.area} hectares."
+  end
+elsif field.class == Pasture
+  field.all_animals.each do |animal, amount|
+    if amount > 1
+      puts "There are #{amount} #{animal} on the Pasture"
+    elsif amount == 1
+      puts "There is #{amount} #{animal} on the Pasture"
+    end 
+  end
+
+  end
     end
     puts "The farm has #{@total_harvest} harvested food so far."
   end
 
   def harvest_crops
     @all_fields.each do |field|
+      if field.class != Pasture
+        if field.area != 0
       puts "Harvesting #{field.harvest} food from #{field.area} hectare #{field.type} field."
       @total_harvest += field.harvest
       field.area=(0)
+    end
+    elsif field.class == Pasture
+       field.harvest
+    end
     end
     puts "The farm has #{@total_harvest} harvested food so far."
   end
 
   def add_new_field
-    puts "What kind of field is it: corn or wheat?"
+    puts "What kind of field is it: corn or wheat, tomatoes or pasture?"
     type = gets.chomp
     until Field.types_of_fields.include?(type)
       puts "Please enter a valid field type"
@@ -71,6 +90,10 @@ class Farm
       @all_fields << Corn.new(area)
     elsif type == "wheat"
       @all_fields << Wheat.new(area)
+    elsif type == "tomatoes"
+      @all_fields << Tomato.new(area)
+    elsif type == "pasture"
+      @all_fields << Pasture.new(area)
     end
     puts "Added a #{type} field of #{area} hectares!"
   end
@@ -78,7 +101,9 @@ class Farm
   def relax
     print "You relax to the sight of "
      @all_fields.each do |field|
+       if field.area != 0
     print "#{field.area} hectares of #{field.type}, "
+  end
     end
     print "it's nice to sit back once in a while."
     puts ""
@@ -96,7 +121,7 @@ end
 
 
 class Field
-@@types_of_fields = ["corn", "wheat"]
+@@types_of_fields = ["corn", "wheat", "tomatoes", "pasture"]
   def initialize(type, area)
     @type = type
     @area = area
@@ -146,6 +171,67 @@ class Wheat < Field
   end
 
 end
+
+class Tomato < Field
+  @@harvest_factor = 10
+
+  def initialize(area)
+    @type = "tomatoes"
+    @area = area
+  end
+
+  def harvest
+    harvest = @@harvest_factor*area
+  end
+
+end
+
+class Pasture < Field
+
+  def initialize(area)
+    @all_animals = {}
+    @type = "pasture"
+    @area = area
+    puts "How many animals on the pasture?"
+    number_of_animals = gets.chomp.to_i
+    until number_of_animals <= area/10
+      puts "Not enough area for the animals"
+      puts "How many animals on the pasture?"
+      number_of_animals = gets.chomp.to_i
+    end
+    i = 0
+    until i == number_of_animals
+      puts "What type of animal is on this pasture?"
+      animal_type = gets.chomp
+      if @all_animals.key?(animal_type) == false
+      @all_animals[animal_type] = 1
+      else
+        @all_animals[animal_type] += 1
+      end
+      i+=1
+    end
+  end
+
+  def harvest
+      @all_animals.each do |type, number|
+        if @all_animals[type] >= 2
+          @all_animals[type] *=2
+          puts "The #{type} have bred and there are now twice as many."
+        end
+        if @all_animals[type] > 1
+        puts "There are now #{@all_animals[type]} #{type} in the pasture."
+      elsif @all_animals[type] = 1
+        puts "There is #{@all_animals[type]} #{type} in the pasture."
+      end
+      end
+  end
+
+  def all_animals
+    @all_animals
+  end
+end
+
+
 
 farm = Farm.new("My Farm")
 farm.main_menu
