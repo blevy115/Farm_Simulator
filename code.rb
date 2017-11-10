@@ -33,7 +33,8 @@ class Farm
     when "harvest" then harvest_crops
     when "status" then status
     when "relax" then relax
-    when "exit" then abort
+    when "exit" then quit
+    else  puts "Not a valid command, please try again"
     end
   end
 
@@ -56,9 +57,21 @@ class Farm
   def add_new_field
     puts "What kind of field is it: corn or wheat?"
     type = gets.chomp
+    until Field.types_of_fields.include?(type)
+      puts "Please enter a valid field type"
+      type = gets.chomp
+    end
     puts "How large is the field in hectares?"
-    area = gets.chomp
-    @all_fields << Field.new(type, area)
+    area = gets.chomp.to_i
+    until area != 0
+      puts "please enter a valid area"
+      area = gets.chomp.to_i
+    end
+    if type == "corn"
+      @all_fields << Corn.new(area)
+    elsif type == "wheat"
+      @all_fields << Wheat.new(area)
+    end
     puts "Added a #{type} field of #{area} hectares!"
   end
 
@@ -71,6 +84,11 @@ class Farm
     puts ""
   end
 
+  def quit
+    puts "Exiting..."
+    abort
+  end
+
   def total_harvest
     @total_harvest
   end
@@ -78,22 +96,10 @@ end
 
 
 class Field
-
+@@types_of_fields = ["corn", "wheat"]
   def initialize(type, area)
     @type = type
     @area = area
-  end
-
-  def harvest_type
-    if @type == "corn"
-      harvest_type = 20
-    elsif @type == "wheat"
-      harvest_type = 30
-    end
-  end
-
-  def harvest
-    harvest = self.harvest_type*@area.to_i
   end
 
   def type
@@ -107,8 +113,39 @@ class Field
   def area=(area)
     @area = area
   end
+
+  def self.types_of_fields
+    @@types_of_fields
+  end
 end
 
+class Corn < Field
+  @@harvest_factor = 20
+
+  def initialize(area)
+    @type = "corn"
+    @area = area
+  end
+
+  def harvest
+    harvest = @@harvest_factor*area
+  end
+
+end
+
+class Wheat < Field
+  @@harvest_factor = 30
+
+  def initialize(area)
+    @type = "wheat"
+    @area = area
+  end
+
+  def harvest
+    harvest = @@harvest_factor*area
+  end
+
+end
 
 farm = Farm.new("My Farm")
 farm.main_menu
